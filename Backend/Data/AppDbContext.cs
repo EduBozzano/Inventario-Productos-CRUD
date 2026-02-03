@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Models;
 
+//se configura la conexion de el modelo con la BD
 namespace Backend.Data;
 
 // Se hereda de DbContext, que es una clase ya hecha en .NET para base de datos
