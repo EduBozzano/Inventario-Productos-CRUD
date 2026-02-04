@@ -29,7 +29,7 @@ public class ProductosController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Producto>> PostProducto(Producto producto)
     {
-        // Asignamos la fecha actual en C# para que no sea año 0001
+        // Asignamos la fecha actual en C# 
         producto.FechaCreacion = DateTime.Now;
 
         // 1. Agregamos el producto a la memoria de EF Core
@@ -40,5 +40,54 @@ public class ProductosController : ControllerBase
 
         // 3. Devolvemos el producto creado con su nuevo ID
         return CreatedAtAction(nameof(GetProductos), new { id = producto.ID }, producto);
+    }
+
+    // PUT: api/productos/5
+    // Se usa para ACTUALIZAR. Recibe el ID en la URL y el objeto modificado en el cuerpo.
+    [HttpPut("{id}")] 
+    public async Task<IActionResult> PutProducto(int id, Producto producto)
+    {
+        if (id != producto.ID)
+        {
+            return BadRequest("El ID de la URL no coincide con el del producto.");
+        }
+
+        // Le decimos a EF Core: "Este objeto ya existe, pero sus valores han cambiado"
+        _context.Entry(producto).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!_context.Productos.Any(e => e.ID == id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return NoContent(); // 204 No Content es el estándar cuando una actualización sale bien
+    }
+
+    // DELETE: api/productos/5
+    // Se usa para ELIMINAR. Solo necesita el ID en la URL.
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteProducto(int id)
+    {
+        var producto = await _context.Productos.FindAsync(id);
+        if (producto == null)
+        {
+            return NotFound();
+        }
+
+        _context.Productos.Remove(producto);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 }
