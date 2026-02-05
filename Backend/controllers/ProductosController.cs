@@ -34,6 +34,17 @@ public class ProductosController : ControllerBase
         }
     }
 
+    //POST: api/productos/resumen
+    [HttpGet("resumen")]
+    public async Task<ActionResult<object>> getResumen()
+    {
+        int conteo = await _context.Productos.CountAsync();
+        int stock = await _context.Productos.SumAsync(p => p.Stock);
+        decimal promedioProductos = await _context.Productos.AverageAsync(elemento => elemento.Precio );
+        var Productos = new { TotalProductos = conteo, TotalStock = stock , Promedio = promedioProductos};
+        return Productos;
+    }
+
     // POST: api/productos
     [HttpPost]
     public async Task<ActionResult<Producto>> PostProducto(Producto producto)
