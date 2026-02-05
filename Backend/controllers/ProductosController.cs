@@ -38,6 +38,10 @@ public class ProductosController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Producto>> PostProducto(Producto producto)
     {
+        if (await _context.Productos.AnyAsync(product => product.Nombre == producto.Nombre))
+        {
+            return BadRequest("El nombre del producto ya existe");
+        }
         // Asignamos la fecha actual en C# 
         producto.FechaCreacion = DateTime.Now;
 
