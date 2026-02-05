@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 // --- ESTADO ---
 const productos = ref([]);
-const modoEdicion = ref(false); // ¿Estamos editando o creando?
+const modoEdicion = ref(false); // Estamos editando o creando?
 const nuevoProducto = ref({
   id: 0,
   nombre: '',
@@ -86,6 +86,16 @@ const limpiarFormulario = () => {
   modoEdicion.value = false;
 };
 
+const esFormularioValido = computed(() => {
+  if (!nuevoProducto.value.nombre || !nuevoProducto.value.stock || !nuevoProducto.value.precio) {
+    return false;
+  }
+  if (nuevoProducto.value.stock <= 0 || nuevoProducto.value.precio <= 0) {
+    return false
+  }
+  return true;
+});
+
 // --- CICLO DE VIDA ---
 onMounted(() => {
   obtenerProductos();
@@ -104,7 +114,7 @@ onMounted(() => {
         <input v-model="nuevoProducto.precio" type="number" placeholder="Precio" step="0.01" required />
         <input v-model="nuevoProducto.stock" type="number" placeholder="Stock" required />
         
-        <button type="submit" :class="modoEdicion ? 'btn-editar' : 'btn-agregar'">
+        <button type="submit" :class="[modoEdicion ? 'btn-editar' : 'btn-agregar' , {'gris-opaco': !esFormularioValido}]" :disabled="!esFormularioValido">
           {{ modoEdicion ? 'Actualizar' : 'Agregar' }}
         </button>
         
@@ -120,7 +130,7 @@ onMounted(() => {
       <li v-for="item in productos" :key="item.id" class="tarjeta-producto">
         <div class="info">
           <strong>{{ item.nombre }}</strong>
-          <span class="stock">Stock: {{ item.stock }}</span>
+          <span class="stock" :class="{ 'alerta-roja': item.stock < 10}">Stock: {{ item.stock }}</span>
         </div>
         
         <div class="acciones">
@@ -160,4 +170,14 @@ button:hover { opacity: 0.9; transform: scale(1.05); }
 .stock { font-size: 0.8em; color: #777; }
 .precio { font-weight: bold; font-size: 1.2em; color: #2c3e50; margin-right: 15px; }
 .acciones { display: flex; align-items: center; }
+
+.alerta-roja{
+  color: RED;
+  font-weight: bold;
+}
+
+.gris-opaco{
+  background: gray;
+  cursor: not-allowed;
+}
 </style>
