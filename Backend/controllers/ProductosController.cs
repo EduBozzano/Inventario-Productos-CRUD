@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
+using Microsoft.Extensions.ObjectPool;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Backend.Controllers;
 
@@ -19,10 +21,17 @@ public class ProductosController : ControllerBase
 
     // GET: api/productos
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
-    {
-        // Esto hace el "SELECT * FROM Productos" automáticamente
-        return await _context.Productos.ToListAsync();
+    public async Task<ActionResult<IEnumerable<Producto>>> GetProductos(string? busqueda)
+    { 
+        if (string.IsNullOrEmpty(busqueda))
+        {
+            // Esto hace el "SELECT * FROM Productos" automáticamente
+            return await _context.Productos.ToListAsync();         
+        }  
+        else
+        {
+            return await _context.Productos.Where(product => product.Nombre.Contains(busqueda)).ToListAsync();
+        }
     }
 
     // POST: api/productos
